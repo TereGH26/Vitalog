@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Auditoría defensiva de VitaLog — 23 de noviembre de 2026</title>
+  <style>
+    :root{--ink:#17312a;--muted:#5d6c66;--bg:#f3f7f5;--card:#fff;--line:#d6e1dc;--crit:#7a1f1f;--alta:#b33a31;--media:#9a6814;--baja:#44738a;--opp:#397a57}
+    *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI",Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55}main{max-width:1100px;margin:auto;padding:28px 20px 48px}h1{font-size:clamp(1.75rem,4vw,2.45rem);line-height:1.2}h2{margin-top:40px;padding-bottom:8px;border-bottom:1px solid var(--line);line-height:1.25}h3{line-height:1.25}.meta,.finding,table{background:var(--card);border:1px solid var(--line);border-radius:10px}.meta{padding:16px;margin:16px 0}.finding{padding:18px;margin:14px 0}.finding dl{display:grid;grid-template-columns:150px 1fr;gap:7px 12px}.finding dt{font-weight:700}.finding dd{margin:0}table{width:100%;border-collapse:collapse;margin:12px 0 22px}th,td{padding:10px;border:1px solid var(--line);text-align:left}th{text-align:center}.badge{display:inline-block;padding:3px 9px;border-radius:999px;color:#fff;font-weight:700;font-size:.82rem}.crit{background:var(--crit)}.alta{background:var(--alta)}.media{background:var(--media)}.baja{background:var(--baja)}.oportunidad{background:var(--opp)}.tag{color:var(--muted)}.evidence{background:#eef3f0;border-left:4px solid #91a99f;padding:12px 14px;overflow:auto}pre{margin:8px 0 0;white-space:pre-wrap;word-break:break-word}code{font-family:Consolas,monospace;font-size:.91rem}ul{padding-left:21px}@media(max-width:650px){.finding dl{grid-template-columns:1fr}table{display:block;overflow-x:auto}}
+  </style>
+</head>
+<body>
+<main>
+  <h1>Auditoría defensiva de VitaLog</h1>
+  <p class="tag">Estado analizado: 23 de noviembre de 2026 · Frontend React, backend Spring Boot y persistencia MongoDB</p>
+
+  <div class="meta">
+    <strong>Alcance.</strong> Análisis estático y pasivo del frontend React, servicios HTTP, autenticación y sesión, seguridad Spring, controladores y DTO de hábitos, persistencia, manejo de errores, pruebas recientes y cambios de interfaz observados. Se incluyeron también las credenciales locales y exclusiones de Git como factores operativos, sin revelar sus valores en este documento.
+  </div>
+
+  <h2>Resumen ejecutivo</h2>
+  <p>El diseño actual protege correctamente los hábitos con una sesión autenticada: el correo se obtiene del principal y no se acepta como identificador elegido por el cliente. Las respuestas no incluyen el correo propietario. React usa renderizado escapado de texto y no se encontró almacenamiento de sesión en <code>localStorage</code>, <code>sessionStorage</code> ni secretos JWT en código fuente.</p>
+  <p>Las mejoras prioritarias son verificar los atributos reales de las cookies en ejecución, cubrir la autorización HTTP y CSRF con pruebas, limitar la duración máxima de hábitos y evitar que errores de base de datos revelen rutas y detalles operativos. No se encontraron evidencias suficientes para declarar una vulnerabilidad crítica o alta confirmada.</p>
+
+  <h2>Conteo de hallazgos</h2>
+  <table aria-label="Conteo de hallazgos por criticidad">
+    <thead><tr><th scope="col">Criticidad</th><th scope="col">Cantidad</th><th scope="col">Significado</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge crit">CRÍTICA</span></td><td>0</td><td>Compromiso severo confirmado.</td></tr>
+      <tr><td><span class="badge alta">ALTA</span></td><td>0</td><td>Impacto alto confirmado con evidencia suficiente.</td></tr>
+      <tr><td><span class="badge media">MEDIA</span></td><td>5</td><td>Riesgo relevante o control no verificable dinámicamente.</td></tr>
+      <tr><td><span class="badge baja">BAJA</span></td><td>3</td><td>Endurecimiento, mantenibilidad o cobertura adicional.</td></tr>
+      <tr><td><span class="badge oportunidad">OPORTUNIDAD</span></td><td>4</td><td>Mejora de rendimiento, arquitectura o accesibilidad.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>1. Vulnerabilidades y seguridad</h2>
+
+  <section class="finding">
+    <h3><span class="badge media">MEDIA</span> Atributos de sesión y cookies no verificables desde el código estático</h3>
+    <dl>
+      <dt>Confianza</dt><dd>Alta en el mecanismo observado; media en el impacto concreto del despliegue.</dd>
+      <dt>Ubicación</dt><dd><code>SecurityConfiguration.java</code>, <code>authService.js</code>, <code>habitService.js</code>, propiedades de aplicación.</dd>
+      <dt>Evidencia</dt><dd>Existe protección CSRF mediante <code>csrf.spa()</code>; el frontend obtiene <code>XSRF-TOKEN</code> y lo envía en <code>X-XSRF-TOKEN</code>. No se declaró explícitamente <code>Secure</code>, <code>HttpOnly</code>, <code>SameSite</code>, caducidad de sesión ni una sesión renovada después del login. No se inspeccionaron cabeceras reales.</dd>
+      <dt>Impacto</dt><dd>Un despliegue externo mal configurado podría ampliar la exposición de la sesión o cambiar el comportamiento CSRF. No se encontró una cookie insegura confirmada ni se ejecutó la aplicación.</dd>
+      <dt>Recomendación</dt><dd>Exigir HTTPS, verificar <code>Set-Cookie</code> en el entorno real y configurar la cookie de sesión como <code>HttpOnly</code>, <code>Secure</code> y con una política <code>SameSite</code> compatible. Mantener CSRF activo y revisar caducidad y renovación al autenticar.</dd>
+    </dl>
+  </section>
+
+  <section class="finding">
+    <h3><span class="badge media">MEDIA</span> Falta de pruebas HTTP que demuestren autorización y aislamiento entre cuentas</h3>
+    <dl>
+      <dt>Confianza</dt><dd>Alta en la ausencia de cobertura observada.</dd>
+      <dt>Ubicación</dt><dd><code>SecurityConfiguration.java</code>, <code>HabitController.java</code>, <code>App.test.js</code>, pruebas JUnit.</dd>
+      <dt>Evidencia</dt><dd><code>/api/habits</code> y <code>/api/habits/**</code> requieren autenticación. Las pruebas del servicio y React no ejercitan una solicitud HTTP anónima, una operación sin CSRF, ni dos usuarios consultando datos separados.</dd>
+      <dt>Impacto</dt><dd>Una revisión futura podría relajar reglas de acceso sin que las pruebas actuales lo detecten.</dd>
+      <dt>Recomendación</dt><dd>Añadir pruebas MockMvc para 401 sin sesión, POST sin CSRF, POST con CSRF, datos separados entre dos cuentas y rechazo de rutas no previstas.</dd>
+    </dl>
+  </section>
+
+  <section class="finding">
+    <h3><span class="badge media">MEDIA</span> Credencial local existente fuera del control de código versionado</h3>
+    <dl>
+      <dt>Confianza</dt><dd>Alta sobre su presencia local; media sobre exposición real.</dd>
+      <dt>Ubicación</dt><dd><code>Vitalog/.env</code>, <code>Vitalog/.gitignore</code>.</dd>
+      <dt>Evidencia</dt><dd>Existe una URI MongoDB local con credenciales en <code>.env</code>. El archivo está excluido explícitamente por <code>.gitignore</code>; no se encontró la credencial real dentro de archivos Java o JavaScript versionados.</dd>
+      <dt>Impacto</dt><dd>Si el equipo comparte copias, imágenes o archivos sin excluirla, o expone el puerto, la credencial podría reutilizarse. Al ser localhost y estar excluida, no hay evidencia de un compromiso confirmado.</dd>
+      <dt>Recomendación</dt><dd>Rotar la credencial si fue compartida o comprometida, usar usuarios distintos por entorno y mantener secretos fuera de artefactos, logs y documentación.</dd>
+    </dl>
+  </section>
+
+  <section class="finding">
+    <h3><span class="badge baja">BAJA</span> Cifrado de contraseñas y normalización de correo confirmados</h3>
+    <dl>
+      <dt>Confianza</dt><dd>Alta.</dd>
+      <dt>Ubicación</dt><dd><code>SecurityConfiguration.java</code>, <code>UserAccountService.java</code>, <code>RegisterRequest.java</code>, <code>UserAccountRepository.java</code>.</dd>
+      <dt>Evidencia</dt><dd>Las contraseñas se cifran con <code>BCryptPasswordEncoder(12)</code>. El correo se valida y normaliza a minúsculas. React aplica los cinco requisitos y backend vuelve a validar.</dd>
+      <dt>Impacto</dt><dd>Control positivo contra almacenamiento de texto plano y registros duplicados por mayúsculas. No sustituye limitación de intentos ni controles operativos.</dd>
+      <dt>Recomendación</dt><dd>Conservar estas reglas y considerar límite de intentos, auditoría de autenticaciones y bloqueo temporal si el entorno lo requiere.</dd>
+    </dl>
+  </section>
+
+  <section class="finding">
+    <h3><span class="badge baja">BAJA</span> Protección XSS directa no encontrada en el frontend revisado</h3>
+    <dl>
+      <dt>Confianza</dt><dd>Alta.</dd>
+      <dt>Ubicación</dt><dd><code>HomePage.js</code>, <code>AuthPage.js</code>, fuentes React.</dd>
+      <dt>Evidencia</dt><dd>Los datos se representan como expresiones React, por ejemplo <code>{habit.name}</code>. No se encontró <code>dangerouslySetInnerHTML</code>, propiedades CSS inyectadas ni HTML construido con datos del usuario.</dd>
+      <dt>Impacto</dt><dd>React escapa el contenido de texto, reduciendo el riesgo de ejecución de código desde nombres o mensajes. No se ha probado a nivel dinámico con caracteres maliciosos.</dd>
+      <dt>Recomendación</dt><dd>Mantener el renderizado seguro y añadir una prueba con texto que contenga HTML y caracteres especiales.</dd>
+    </dl>
+  </section>
+
+  <h2>2. Seguridad y validación de hábitos</h2>
+
+  <section class="finding">
+    <h3><span class="badge media">MEDIA</span> Duración sin límite máximo ni alineación de rangos</h3>
+    <dl>
+      <dt>Confianza</dt><dd>Alta.</dd>
+      <dt>Ubicación</dt><dd><code>CreateHabitRequest.java</code>, <code>HabitService.java</code>, <code>HomePage.js</code>.</dd>
+      <dt>Evidencia</dt><dd>Backend exige <code>@Min(1)</code>, pero no <code>@Max</code>. Frontend exige entero positivo y tampoco tiene máximo. Se usa 66 como valor predeterminado.</dd>
+      <dt>Impacto</dt><dd>Datos desproporcionados pueden afectar presentación, cálculos futuros o persistencia lógica. Es un riesgo de integridad y uso abusivo, no una inyección confirmada.</dd>
+      <dt>Recomendación</dt><dd>Acordar un máximo de producto y aplicarlo igual en backend y frontend. Añadir límites para nombres al máximo permitido y casos superiores e inferiores.</dd>
+      <dt>Ejemplo ilustrativo mínimo</dt><dd><div class="evidence"><pre><code>@Min(value = 1)
+@Max(value = 365, message = "La duración máxima es 365 días.")
+Integer durationDays;</code></pre></div></dd>
+    </dl>
+  </section>
+
+  <section class="finding">
+    <h3><span class="badge media">MEDIA</span> Aislamiento positivo por cuenta para crear y listar hábitos</h3>
+    <dl>
+      <dt>Confianza</dt><dd>Alta sobre el código.</dd>
+      <dt>Ubicación</dt><dd><code>HabitController.java</code>, <code>HabitService.java</code>, <code>HabitRepository.java</code>, <code>HabitResponse.java</code>.</dd>
+      <dt>Evidencia</dt><dd><code>list</code> y <code>create</code> reciben <code>@AuthenticationPrincipal UserDetails</code>. El servicio guarda y consulta por su nombre de usuario. El cliente no puede enviar <code>accountEmail</code> como entrada ni la respuesta lo devuelve.</dd>
+      <dt>Impacto</dt><dd>Reduce el riesgo de cruce de datos entre cuentas. Debe mantenerse cubierto por pruebas HTTP posteriores.</dd>
+      <dt>Recomendación</dt><dd>No permitir búsquedas por una cuenta suministrada por el cliente y conservar el principal autenticado como única fuente de propiedad.</dd>
+    </dl>
+  </section>
+
+  <section class="finding">
+    <h3><span class="badge baja">BAJA</span> Validación dual y normalización son positivas, con casos de Unicode pendientes</h3>
+    <dl>
+      <dt>Confianza</dt><dd>Alta.</dd>
+      <dt>Ubicación</dt><dd><code>passwordValidation.js</code>, <code>AuthPage.js</code>, <code>CreateHabitRequest.java</code>, <code>HabitService.java</code>, <code>HabitServiceTests.java</code>.</dd>
+      <dt>Evidencia</dt><dd>Correo, contraseña, nombre, duración, frecuencia y días tienen validación cliente/servidor o reglas de servicio. Las pruebas cubren duración, días semanales y requisitos de contraseña.</dd>
+      <dt>Impacto</dt><dd>No se encontró que el backend confíe en la UI. Faltan casos de Unicode, espacios, nombres al límite y entradas duplicadas o ambiguas.</dd>
+      <dt>Recomendación</dt><dd>Añadir pruebas equivalentes para ambos niveles y mantener mensajes consistentes. Eliminar alias ambiguos si el requisito no los necesita.</dd>
+    </dl>
+  </section>
+
+  <h2>3. Persistencia y manejo de MongoDB</h2>
+
+  <section class="finding">
+    <h3><span class="badge media">MEDIA</span> Los errores de MongoDB revelan detalles operativos al cliente</h3>
+    <dl>
+      <dt>Confianza</dt><dd>Alta sobre el código; impacto operativo condicionado.</dd>
+      <dt>Ubicación</dt><dd><code>ApiExceptionHandler.java</code>, <code>application-local.properties</code>.</dd>
+      <dt>Evidencia</dt><dd>Ante <code>DataAccessException</code>, la respuesta menciona <code>MONGODB_URI</code>, una ruta relativa y el reinicio del servicio.</dd>
+      <dt>Impacto</dt><dd>Un usuario que observe el fallo recibe información útil para reconocimiento operativo. Los detalles técnicos deberían permanecer en logs protegidos.</dd>
+      <dt>Recomendación</dt><dd>Responder con un mensaje estable y genérico, registrar la causa y un identificador de correlación interno, y reservar instrucciones de configuración para operación.</dd>
+    </dl>
+  </section>
+
+  <section class="finding">
+    <h3><span class="badge media">MEDIA</span> Falta un manejador explícito para excepciones generales no previstas</h3>
+    <dl>
+      <dt>Confianza</dt><dd>Alta sobre la ausencia de una ruta general; impacto condicionado.</dd>
+      <dt>Ubicación</dt><dd><code>ApiExceptionHandler.java</code>.</dd>
+      <dt>Evidencia</dt><dd>El manejador cubre validación, MongoDB y reglas específicas de hábitos y cuentas, pero no se encontró <code>@ExceptionHandler(Exception.class)</code> ni respuesta genérica 500.</dd>
+      <dt>Impacto</dt><dd>Errores inesperados podrían depender del contenedor o mostrar información distinta entre entornos.</dd>
+      <dt>Recomendación</dt><dd>Añadir respuesta 500 estable sin trazas ni detalles internos y mantener el registro técnico con trazabilidad.</dd>
+    </dl>
+  </section>
+
+  <section class="finding">
+    <h3><span class="badge oportunidad">OPORTUNIDAD</span> Consulta por cuenta sin índice compuesto declarado</h3>
+    <dl>
+      <dt>Confianza</dt><dd>Alta sobre la consulta; impacto real no medido.</dd>
+      <dt>Ubicación</dt><dd><code>Habit.java</code>, <code>HabitRepository.java</code>.</dd>
+      <dt>Evidencia</dt><dd><code>findByAccountEmailOrderByStartDateDesc</code> filtra por correo y ordena por fecha. No se encontró anotación o creación automática de índice.</dd>
+      <dt>Impacto</dt><dd>Con pocos datos no será relevante. Al crecer el volumen, MongoDB podría recorrer documentos y ordenar resultados.</dd>
+      <dt>Recomendación</dt><dd>Evaluar un índice compuesto <code>{ accountEmail: 1, startDate: -1 }</code>, validar planes de ejecución con datos representativos y desplegarlo de forma controlada.</dd>
+    </dl>
+  </section>
+
+  <section class="finding">
+    <h3><span class="badge oportunidad">OPORTUNIDAD</span> Listado completo sin paginación ni límite</h3>
+    <dl>
+      <dt>Confianza</dt><dd>Alta sobre el comportamiento; impacto por volumen no medido.</dd>
+      <dt>Ubicación</dt><dd><code>HabitController.java</code>, <code>HabitService.java</code>, <code>HabitRepository.java</code>, <code>HomePage.js</code>.</dd>
+      <dt>Evidencia</dt><dd>El servicio devuelve todas las coincidencias de una cuenta y React las conserva en una sola lista sin virtualización ni paginación.</dd>
+      <dt>Impacto</dt><dd>Puede crecer el tiempo de serialización, el tamaño de red y la memoria del navegador. No existe evidencia de volumen suficiente para llamarlo vulnerabilidad confirmada.</dd>
+      <dt>Recomendación</dt><dd>Introducir paginación o límite después de medir cargas representativas, manteniendo cuenta y orden descendente por fecha.</dd>
+    </dl>
+  </section>
+
+  <h2>4. React, cambios recientes y arquitectura</h2>
+
+  <section class="finding">
+    <h3><span class="badge media">MEDIA</span> El cambio reciente abre/cierra el formulario, pero no ofrece cancelación ni gestión de foco</h3>
+    <dl>
+      <dt>Confianza</dt><dd>Alta sobre el estado actual; media sobre el requisito de UX.</dd>
+      <dt>Ubicación</dt><dd><code>HomePage.js</code>, <code>App.test.js</code>, <code>App.css</code>.</dd>
+      <dt>Evidencia</dt><dd><code>isHabitFormOpen</code> comienza en falso, el botón abre el panel y el éxito lo cierra y restablece campos. Las pruebas cubren apertura, duración 66, diaria y cierre tras guardar. No hay botón Cancelar ni foco movido al abrir/cerrar.</dd>
+      <dt>Impacto</dt><dd>No se encontró pérdida de datos por React. El usuario puede quedar sin una salida explícita hasta guardar o salir de la pantalla, y el foco puede permanecer fuera del nuevo contenido.</dd>
+      <dt>Recomendación</dt><dd>Añadir Cancelar, mover el foco al campo principal al abrir y devolverlo al botón Crear al cerrar. Probar cancelación, éxito y fallo con roles accesibles.</dd>
+    </dl>
+  </section>
+
+  <section class="finding">
+    <h3><span class="badge baja">BAJA</span> Efectos React limpios, con responsabilidad concentrada en HomePage</h3>
+    <dl>
+      <dt>Confianza</dt><dd>Alta.</dd>
+      <dt>Ubicación</dt><dd><code>App.js</code>, <code>HomePage.js</code>, <code>AuthPage.js</code>.</dd>
+      <dt>Evidencia</dt><dd>Los efectos usan banderas <code>active</code> y limpieza al desmontar. El formulario y el listado están en estado local. <code>HomePage</code> combina presentación, validación, solicitudes y sesión visual.</dd>
+      <dt>Impacto</dt><dd>La página es funcional y evita una actualización obvia tras desmontar. La concentración de responsabilidades puede aumentar la deuda de mantenimiento.</dd>
+      <dt>Recomendación</dt><dd>Separar componentes de formulario/listado si crece la pantalla y centralizar validaciones o contratos HTTP. Mantener limpieza o adoptar cancelación de solicitudes.</dd>
+    </dl>
+  </section>
+
+  <section class="finding">
+    <h3><span class="badge oportunidad">OPORTUNIDAD</span> Cobertura reciente amplia en UI, pero incompleta en errores y seguridad HTTP</h3>
+    <dl>
+      <dt>Confianza</dt><dd>Alta.</dd>
+      <dt>Ubicación</dt><dd><code>App.test.js</code>, <code>HabitServiceTests.java</code>, <code>UserAccountServiceTests.java</code>.</dd>
+      <dt>Evidencia</dt><dd>Las pruebas cubren formularios, contraseña, duración y hábito semanal. Faltan cancelación, errores de API, 401/403, CSRF, aislamiento, límites superiores y carga/paginación.</dd>
+      <dt>Impacto</dt><dd>Las pruebas existentes protegen cambios principales, pero no demostraciones de seguridad ni regresiones de acceso.</dd>
+      <dt>Recomendación</dt><dd>Ampliar React Testing Library y añadir pruebas de seguridad Spring. Mantener pruebas aisladas y sin modificar datos reales.</dd>
+    </dl>
+  </section>
+
+  <section class="finding">
+    <h3><span class="badge oportunidad">OPORTUNIDAD</span> Lectura CSRF duplicada puede centralizarse</h3>
+    <dl>
+      <dt>Confianza</dt><dd>Media.</dd>
+      <dt>Ubicación</dt><dd><code>authService.js</code>, <code>habitService.js</code>.</dd>
+      <dt>Evidencia</dt><dd>Ambos módulos implementan por separado la lectura de <code>XSRF-TOKEN</code> y el refresco.</dd>
+      <dt>Impacto</dt><dd>Actualmente son coherentes. Una modificación futura podría actualizar sólo una ruta y romper el envío CSRF.</dd>
+      <dt>Recomendación</dt><dd>Centralizar cookie, refresco y cabecera CSRF en una utilidad HTTP compartida.</dd>
+    </dl>
+  </section>
+
+  <h2>Controles positivos confirmados</h2>
+  <ul>
+    <li>Los endpoints de hábitos usan el principal autenticado; no hay un correo solicitado por el cliente para seleccionar la cuenta.</li>
+    <li>Las respuestas de hábito excluyen <code>accountEmail</code>.</li>
+    <li>El backend valida entradas con Bean Validation y el servicio vuelve a comprobar frecuencia y duración mínima.</li>
+    <li>No se encontró inyección de HTML, JWT expuesto ni tokens de sesión en almacenamiento web.</li>
+    <li>Spring permite únicamente rutas estáticas y API declaradas; las rutas no previstas se deniegan.</li>
+    <li>Los errores visibles usan <code>role="alert"</code>; los botones deshabilitan durante el guardado y los inputs tienen etiquetas asociadas.</li>
+    <li>Los cambios recientes tienen pruebas React para apertura/cierre y creación exitosa/fallida.</li>
+  </ul>
+
+  <h2>Limitaciones y verificaciones pendientes</h2>
+  <ul>
+    <li>No se inició la aplicación ni se inspeccionaron respuestas HTTP reales, cabeceras <code>Set-Cookie</code>, TLS, CORS, proxy inverso ni redirecciones.</li>
+    <li>No se ejecutaron ataques ni pruebas dinámicas de fuerza bruta, CSRF, sesiones concurrentes o aislamiento entre cuentas.</li>
+    <li>No se ejecutaron nuevamente las pruebas; el informe se basa en el código y resultados previos disponibles, no en una ejecución nueva.</li>
+    <li>No se midieron volúmenes reales de MongoDB, planes de consulta ni requisitos de datos por usuario.</li>
+    <li>No se inspeccionaron contenedores externos, backups, permisos de producción ni configuración de infraestructura fuera del workspace.</li>
+    <li>Las observaciones sobre cookies, credenciales y exposición operacional son condicionales hasta comprobar el entorno desplegado.</li>
+  </ul>
+
+  <h2>Criterio de confianza y cierre</h2>
+  <p><strong>Confianza alta</strong> significa evidencia directa en archivos fuente o configuración revisada. <strong>Confianza media</strong> significa que falta comprobación dinámica o medición de impacto. No se declararon vulnerabilidades críticas o altas por ausencia de evidencia suficiente. Este documento conserva recomendaciones anteriores relevantes y refleja el estado actual sin modificar código de aplicación.</p>
+</main>
+</body>
+</html>

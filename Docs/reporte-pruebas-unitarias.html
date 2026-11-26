@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reporte de pruebas unitarias | VitaLog</title>
+  <style>
+    :root{--ink:#18312a;--muted:#607069;--bg:#f3f6f4;--card:#fff;--line:#d7e2dc;--green:#26714e;--red:#a52b31;--amber:#986612;--soft:#edf4ef}
+    *{box-sizing:border-box}body{margin:0;font-family:"Segoe UI",Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5}main{max-width:1100px;margin:auto;padding:32px 20px 56px}
+    h1,h2,h3{line-height:1.22}h1{margin-bottom:6px}h2{margin-top:36px;padding-bottom:8px;border-bottom:1px solid var(--line)}.subtitle{color:var(--muted)}
+    .cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin:24px 0}.card,.panel{border:1px solid var(--line);border-radius:10px;background:var(--card)}.card{padding:16px}.card strong{display:block;font-size:1.7rem}.card span{color:var(--muted);font-size:.9rem}
+    .panel{margin:14px 0;padding:18px}.badge{display:inline-block;padding:4px 9px;border-radius:999px;color:#fff;font-size:.82rem;font-weight:700}.pass{background:var(--green)}.warn{background:var(--amber)}.fail{background:var(--red)}
+    table{width:100%;border-collapse:collapse;background:var(--card)}th,td{padding:10px 12px;border:1px solid var(--line);text-align:left}th{background:var(--soft)}.name{font-family:Consolas,"Courier New",monospace;font-size:.88rem}.center{text-align:center}.source{color:var(--muted);font-size:.88rem}
+    pre{margin:10px 0 0;padding:12px;border-left:4px solid #91a99f;background:#eef3f0;white-space:pre-wrap;overflow-wrap:anywhere}.footer{margin-top:34px;color:var(--muted);font-size:.88rem}
+    @media(max-width:720px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}table{display:block;overflow-x:auto}}
+  </style>
+</head>
+<body>
+<main>
+  <p class="subtitle">VitaLog · Spring Boot 4.1.2 y React 18</p>
+  <h1>Reporte de pruebas unitarias</h1>
+  <p class="subtitle">Validación ejecutada de RU-01 (creación de cuenta/acceso) y RU-02 (creación de hábitos) · 23 de noviembre de 2026</p>
+
+  <div class="cards">
+    <div class="card"><strong>15</strong><span>Pruebas totales</span></div>
+    <div class="card"><strong>15</strong><span>Pruebas aprobadas</span></div>
+    <div class="card"><strong>0</strong><span>Fallos / errores</span></div>
+    <div class="card"><strong>100%</strong><span>Pruebas aprobadas</span></div>
+    <div class="card"><strong>100%</strong><span>Escenarios RU seleccionados</span></div>
+  </div>
+
+  <h2>Resultado general</h2>
+  <div class="panel">
+    <span class="badge pass">APROBADO</span>
+    <p>Las 4 suites disponibles (3 backend y 1 frontend) finalizaron sin fallos ni errores: 15 pruebas aprobadas de 15. El frontend emitió advertencias de React sobre actualizaciones asíncronas no envueltas en <code>act(...)</code>, sin afectar ningún resultado.</p>
+  </div>
+
+  <h2>Comandos ejecutados</h2>
+  <table>
+    <thead><tr><th>Ámbito</th><th>Comando real</th><th>Estado</th><th>Resultado verificable</th></tr></thead>
+    <tbody>
+      <tr><td>Backend</td><td class="name">C:\...\Vitalog\.tools\apache-maven-3.10.0\bin\mvn.cmd test</td><td><span class="badge pass">Aprobado</span></td><td>3 suites, 7 pruebas, 0 fallos, 0 errores, 0 omitidas.</td></tr>
+      <tr><td>Frontend</td><td class="name">npm test -- --watchAll=false</td><td><span class="badge pass">Aprobado</span></td><td>1 suite, 8 pruebas, 0 fallos, 0 omitidas; 20.454 s.</td></tr>
+      <tr><td>Frontend build</td><td class="name">npm run build</td><td><span class="badge pass">Aprobado</span></td><td>Compilación de producción completada correctamente.</td></tr>
+    </tbody>
+  </table>
+  <p class="source">El backend se ejecutó desde <code>Vitalog/backend</code>. Maven no estaba disponible en el <code>PATH</code>; se utilizó la instalación local incluida en <code>Vitalog/.tools/apache-maven-3.10.0/bin/mvn.cmd</code>.</p>
+
+  <h2>Backend — Maven / JUnit 5 / Mockito</h2>
+  <div class="panel">
+    <p><span class="badge pass">APROBADO</span> <strong>7 pruebas ejecutadas</strong>; 7 aprobadas, 0 fallidas, 0 con error y 0 omitidas. Tiempo acumulado de suites: 38.056 s.</p>
+  </div>
+  <table>
+    <thead><tr><th>Suite / requisito</th><th>Prueba JUnit</th><th>Resultado</th><th>Tiempo</th><th>Verificación</th></tr></thead>
+    <tbody>
+      <tr><td>HabitServiceTests · RU-02</td><td class="name">createsDailyHabitWithDefaultDurationAndAuthenticatedAccount</td><td><span class="badge pass">Pasa</span></td><td>0.158 s</td><td>Duración 66, frecuencia DAILY, estado IN_CONSTRUCTION, inicio no nulo y usuario asociado.</td></tr>
+      <tr><td>HabitServiceTests · RU-02</td><td class="name">createsWeeklyHabitWithSelectedDays</td><td><span class="badge pass">Pasa</span></td><td>0.277 s</td><td>Conserva MONDAY y FRIDAY en una frecuencia semanal.</td></tr>
+      <tr><td>HabitServiceTests · RU-02</td><td class="name">rejectsWeeklyHabitWithoutDays</td><td><span class="badge pass">Pasa</span></td><td>11.975 s</td><td>Rechaza semanal sin días con el mensaje esperado.</td></tr>
+      <tr><td>HabitServiceTests · RU-02</td><td class="name">rejectsDurationBelowOneDay</td><td><span class="badge pass">Pasa</span></td><td>0.052 s</td><td>Rechaza duración 0 con el mensaje esperado.</td></tr>
+      <tr><td>UserAccountServiceTests · RU-01</td><td class="name">storesNormalizedEmailAndBcryptHash</td><td><span class="badge pass">Pasa</span></td><td>0.090 s</td><td>Normaliza el correo, genera hash BCrypt y verifica la coincidencia.</td></tr>
+      <tr><td>UserAccountServiceTests · RU-01</td><td class="name">rejectsAnEmailThatAlreadyExists</td><td><span class="badge pass">Pasa</span></td><td>1.383 s</td><td>Impide registrar una cuenta cuyo correo ya existe.</td></tr>
+      <tr><td>VitalogApplicationTests</td><td class="name">contextLoads</td><td><span class="badge pass">Pasa</span></td><td>23.831 s</td><td>El contexto Spring Boot se carga correctamente.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Frontend — Jest / React Testing Library</h2>
+  <div class="panel">
+    <p><span class="badge pass">APROBADO</span> <strong>8 pruebas ejecutadas</strong>; 8 aprobadas, 0 fallidas, 0 omitidas. 1 suite aprobada en 20.454 s.</p>
+  </div>
+  <table>
+    <thead><tr><th>Prueba Jest · requisito</th><th>Resultado</th><th>Tiempo observado</th><th>Verificación</th></tr></thead>
+    <tbody>
+      <tr><td class="name">muestra el formulario para ingresar con correo y contraseña · RU-01</td><td><span class="badge pass">Pasa</span></td><td>448 ms</td><td>Muestra inicio de sesión, correo tipo email y contraseña tipo password.</td></tr>
+      <tr><td class="name">muestra los cinco requisitos al crear una cuenta · RU-01</td><td><span class="badge pass">Pasa</span></td><td>222 ms</td><td>Presenta los cinco criterios de una contraseña válida.</td></tr>
+      <tr><td class="name">valida una contraseña con los cinco criterios requeridos · RU-01</td><td><span class="badge pass">Pasa</span></td><td>4 ms</td><td>Acepta VitaLog1! y rechaza un valor que no cumple todas las reglas.</td></tr>
+      <tr><td class="name">oculta el formulario al entrar y lo muestra al pulsar Crear hábito · RU-02</td><td><span class="badge pass">Pasa</span></td><td>240 ms</td><td>El formulario comienza oculto y se abre mediante el botón compacto.</td></tr>
+      <tr><td class="name">muestra duración inicial de 66 días y frecuencia diaria · RU-02</td><td><span class="badge pass">Pasa</span></td><td>571 ms</td><td>El formulario muestra duración 66 y frecuencia Diaria seleccionada.</td></tr>
+      <tr><td class="name">rechaza un hábito semanal sin días seleccionados · RU-02</td><td><span class="badge pass">Pasa</span></td><td>465 ms</td><td>Muestra alerta y no invoca createHabit ante una selección inválida.</td></tr>
+      <tr><td class="name">oculta el formulario después de crear el hábito · RU-02</td><td><span class="badge pass">Pasa</span></td><td>351 ms</td><td>Cierra el formulario y muestra el hábito después de una creación exitosa.</td></tr>
+      <tr><td class="name">mantiene el formulario abierto cuando falla la creación del hábito · RU-02</td><td><span class="badge pass">Pasa</span></td><td>320 ms</td><td>Conserva el formulario y sus datos mientras muestra el error de creación.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Advertencias y posibles riesgos</h2>
+  <div class="panel">
+    <p><span class="badge warn">ADVERTENCIA</span> React emitió: “An update to HomePage inside a test was not wrapped in act(...)”. La actualización proviene de <code>getHabits()</code> al resolver su promesa.</p>
+    <p><span class="badge warn">ADVERTENCIA</span> Mockito emitió avisos sobre carga dinámica de agentes en JDK 21. No produjo fallos ni errores en las pruebas backend.</p>
+    <p><strong>Impacto:</strong> las advertencias no alteraron los resultados, pero conviene envolver las cargas asíncronas en pruebas futuras y revisar la compatibilidad del agente Mockito con versiones futuras del JDK.</p>
+  </div>
+
+  <h2>Resumen por requerimiento y cobertura funcional</h2>
+  <table>
+    <thead><tr><th>Requerimiento / criterio</th><th>Cobertura ejecutada</th><th>Estado</th></tr></thead>
+    <tbody>
+      <tr><td>RU-01: formulario de acceso con correo y contraseña</td><td>Prueba frontend específica</td><td><span class="badge pass">Cubierto</span></td></tr>
+      <tr><td>RU-01: cinco reglas de contraseña al crear cuenta</td><td>Dos pruebas frontend y validación backend</td><td><span class="badge pass">Cubierto</span></td></tr>
+      <tr><td>RU-01: normalización y hash seguro del correo/contraseña</td><td>Dos pruebas Mockito/JUnit</td><td><span class="badge pass">Cubierto</span></td></tr>
+      <tr><td>RU-01: correo duplicado</td><td>Prueba backend específica</td><td><span class="badge pass">Cubierto</span></td></tr>
+      <tr><td>RU-02: formulario oculto inicialmente y apertura compacta</td><td>Prueba frontend específica</td><td><span class="badge pass">Cubierto</span></td></tr>
+      <tr><td>RU-02: duración predeterminada de 66 días y frecuencia diaria</td><td>Una prueba backend y una frontend</td><td><span class="badge pass">Cubierto</span></td></tr>
+      <tr><td>RU-02: duración mínima de 1 día</td><td>Prueba backend específica</td><td><span class="badge pass">Cubierto</span></td></tr>
+      <tr><td>RU-02: frecuencia semanal con al menos un día</td><td>Una prueba positiva y una negativa en backend; negativa en frontend</td><td><span class="badge pass">Cubierto</span></td></tr>
+      <tr><td>RU-02: cierre después de creación exitosa</td><td>Prueba frontend específica</td><td><span class="badge pass">Cubierto</span></td></tr>
+      <tr><td>RU-02: permanencia del formulario ante errores</td><td>Prueba frontend específica con <code>createHabit.mockRejectedValue</code></td><td><span class="badge pass">Cubierto</span></td></tr>
+    </tbody>
+  </table>
+  <p class="source"><strong>Porcentaje declarado:</strong> 100% de los 15 escenarios/pruebas ejecutadas. No equivale a porcentaje de cobertura de líneas; no se ejecutó JaCoCo ni medición automática de cobertura Jest.</p>
+
+  <h2>Fuentes y rutas de resultados</h2>
+  <table>
+    <thead><tr><th>Fuente</th><th>Ruta relativa</th><th>Uso en el reporte</th></tr></thead>
+    <tbody>
+      <tr><td>Pruebas frontend</td><td><code>Vitalog/frontend/src/App.test.js</code></td><td>Detalle de 8 pruebas Jest/RTL.</td></tr>
+      <tr><td>Pruebas backend</td><td><code>Vitalog/backend/src/test/java/com/vitalog/service/HabitServiceTests.java</code></td><td>4 pruebas RU-02 JUnit/Mockito.</td></tr>
+      <tr><td>Pruebas de cuentas</td><td><code>Vitalog/backend/src/test/java/com/vitalog/service/UserAccountServiceTests.java</code></td><td>2 pruebas RU-01 JUnit/Mockito.</td></tr>
+      <tr><td>Prueba de contexto</td><td><code>Vitalog/backend/src/test/java/com/vitalog/VitalogApplicationTests.java</code></td><td>Carga del contexto Spring Boot.</td></tr>
+      <tr><td>Reportes Surefire</td><td><code>Vitalog/backend/target/surefire-reports/TEST-*.xml</code></td><td>Datos reales de las tres suites backend.</td></tr>
+    </tbody>
+  </table>
+
+  <p class="footer">Reporte generado a partir de ejecuciones reales el 23 de noviembre de 2026. No se modificó código de aplicación; se añadió una prueba al archivo de pruebas frontend.</p>
+</main>
+</body>
+</html>

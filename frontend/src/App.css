@@ -1,0 +1,274 @@
+:root {
+  color: #172a26;
+  background: #f3f6f2;
+  font-family: "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app-shell {
+  min-height: 100vh;
+  padding: 32px;
+  background: linear-gradient(140deg, #f3f6f2 0%, #e8f0ea 48%, #edf1f4 100%);
+}
+
+.auth-layout {
+  display: grid;
+  place-items: center;
+}
+
+.auth-panel {
+  width: min(100%, 440px);
+  padding: 36px;
+  border: 1px solid #d5e0d9;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 18px 50px rgb(23 42 38 / 8%);
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: #39735f;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.auth-panel h1,
+.welcome-panel h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  line-height: 1.2;
+}
+
+.auth-intro {
+  margin: 10px 0 24px;
+  color: #5b6b65;
+}
+
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-bottom: 24px;
+  padding: 4px;
+  border-radius: 6px;
+  background: #edf2ee;
+}
+
+.auth-tabs button {
+  min-height: 40px;
+  border: 0;
+  border-radius: 4px;
+  color: #53635c;
+  background: transparent;
+}
+
+.auth-tabs button.active {
+  color: #173c30;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(23 42 38 / 12%);
+}
+
+.auth-form {
+  display: grid;
+  gap: 10px;
+}
+
+.auth-form label {
+  margin-top: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.auth-form input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #b9c9c0;
+  border-radius: 5px;
+  color: #172a26;
+  background: #fff;
+}
+
+.auth-form input:focus-visible,
+button:focus-visible {
+  outline: 3px solid #7db99f;
+  outline-offset: 2px;
+}
+
+.password-rules {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 6px 0 4px 20px;
+  color: #65756e;
+  font-size: 0.82rem;
+}
+
+.password-rules li.valid {
+  color: #26714e;
+}
+
+.primary-button,
+.secondary-button {
+  min-height: 42px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  font-weight: 650;
+}
+
+.primary-button {
+  margin-top: 12px;
+  color: #fff;
+  background: #236449;
+}
+
+.primary-button:hover:not(:disabled) {
+  background: #194f38;
+}
+
+.primary-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.secondary-button {
+  padding: 0 14px;
+  border-color: #b9c9c0;
+  color: #244b3b;
+  background: #fff;
+}
+
+.form-error {
+  margin: 4px 0;
+  color: #a52b31;
+  font-size: 0.9rem;
+}
+
+.home-layout {
+  padding: 26px clamp(20px, 5vw, 72px);
+}
+
+.home-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #d2ddd6;
+}
+
+.home-header .eyebrow {
+  margin: 0;
+}
+
+.account-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #53635c;
+  font-size: 0.9rem;
+}
+
+.welcome-panel {
+  display: grid;
+  min-height: min(65vh, 560px);
+  place-items: center;
+  color: #173c30;
+}
+
+.habit-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 440px) minmax(280px, 1fr);
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.habit-layout {
+  grid-template-columns: 1fr;
+}
+
+.weekday-grid {
+  grid-template-columns: 1fr;
+}
+
+.habit-form-panel,
+.habit-list-panel {
+  border: 1px solid #d5e0d9;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 18px 50px rgb(23 42 38 / 6%);
+}
+
+.habit-form-panel { padding: 28px; }
+.habit-form-panel h1 { margin: 0 0 20px; font-size: 1.6rem; }
+.habit-list-panel { padding: 28px; }
+
+.habit-form { display: grid; gap: 12px; }
+.habit-form label,
+.habit-form legend { font-size: 0.9rem; font-weight: 600; }
+.habit-form input[type='text'],
+.habit-form input:not([type]),
+.habit-form input[type='number'] {
+  width: 100%; min-height: 44px; padding: 10px 12px;
+  border: 1px solid #b9c9c0; border-radius: 5px;
+}
+.habit-form fieldset {
+  display: grid; gap: 8px; margin: 4px 0; border: 0; padding: 0;
+}
+.radio-option,
+.weekday-option { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+.weekday-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.habit-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.habit-list li {
+  display: grid; gap: 5px; padding: 14px;
+  border: 1px solid #dfe7e2; border-radius: 6px; background: #fafcfb;
+}
+.habit-list li span { color: #65756e; font-size: 0.88rem; }
+
+.habit-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.habit-create-button {
+  width: auto;
+  min-height: 40px;
+  margin: 0;
+  padding: 0 16px;
+}
+
+@media (max-width: 520px) {
+  .app-shell {
+    padding: 18px;
+  }
+
+  .auth-panel {
+    padding: 26px 20px;
+  }
+
+  .home-header,
+  .account-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

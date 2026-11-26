@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RU-02 — Crear un hábito | VitaLog</title>
+  <style>
+    :root { --ink:#18312a; --muted:#5f716a; --bg:#f4f7f5; --card:#fff; --line:#d7e2dc; --green:#236449; --soft:#edf4ef; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:"Segoe UI",Arial,sans-serif; color:var(--ink); background:var(--bg); line-height:1.55; }
+    main { max-width:980px; margin:auto; padding:32px 20px 56px; }
+    h1,h2,h3 { line-height:1.22; }
+    h1 { margin-bottom:8px; }
+    h2 { margin-top:38px; padding-bottom:8px; border-bottom:1px solid var(--line); }
+    .subtitle,.tag { color:var(--muted); }
+    .card { margin:16px 0; padding:18px 20px; border:1px solid var(--line); border-radius:10px; background:var(--card); }
+    .status { display:inline-block; margin:8px 0; padding:5px 10px; border-radius:999px; color:white; background:var(--green); font-weight:700; }
+    table { width:100%; border-collapse:collapse; background:var(--card); }
+    th,td { padding:10px 12px; border:1px solid var(--line); text-align:left; vertical-align:top; }
+    th { background:var(--soft); }
+    ol,ul { padding-left:22px; }
+    code { font-family:Consolas,"Courier New",monospace; font-size:.92em; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    .scenario { border-left:4px solid var(--green); }
+    .result { color:#26714e; font-weight:700; }
+    @media(max-width:650px) { .grid { grid-template-columns:1fr; } table { display:block; overflow-x:auto; } }
+  </style>
+</head>
+<body>
+<main>
+  <p class="tag">VitaLog · Requisito funcional</p>
+  <h1>RU-02 — Crear un hábito</h1>
+  <p class="subtitle">Documento funcional de comportamiento, validaciones y criterios de aceptación.</p>
+  <span class="status">Implementado</span>
+
+  <section class="card">
+    <h2>Propósito</h2>
+    <p>Permitir que un usuario autenticado registre un hábito con su nombre, duración de seguimiento y frecuencia. El hábito se muestra inicialmente como <strong>en construcción</strong> y queda asociado a la cuenta que inició sesión.</p>
+  </section>
+
+  <h2>Campos disponibles</h2>
+  <table>
+    <thead>
+      <tr><th>Campo</th><th>Entrada</th><th>Comportamiento</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Nombre del hábito</td><td>Texto</td><td>Obligatorio; máximo 100 caracteres.</td></tr>
+      <tr><td>Duración del seguimiento</td><td>Número entero de días</td><td>Valor inicial 66; mínimo 1 día.</td></tr>
+      <tr><td>Frecuencia</td><td>Diaria o semanal</td><td>Diaria por defecto.</td></tr>
+      <tr><td>Días de la semana</td><td>Uno o varios checkboxes</td><td>Se muestran únicamente para frecuencia semanal y al menos uno es obligatorio.</td></tr>
+      <tr><td>Fecha de inicio</td><td>Asignada por el sistema</td><td>Se establece al momento de guardar.</td></tr>
+      <tr><td>Estado inicial</td><td>Asignado por el sistema</td><td>El hábito se guarda como <strong>en construcción</strong>.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Validaciones</h2>
+  <div class="grid">
+    <section class="card">
+      <h3>En la interfaz</h3>
+      <ul>
+        <li>No permite nombre vacío.</li>
+        <li>Limita el nombre a 100 caracteres.</li>
+        <li>Exige duración mayor o igual a 1.</li>
+        <li>Exige al menos un día cuando la frecuencia es semanal.</li>
+      </ul>
+    </section>
+    <section class="card">
+      <h3>En el backend</h3>
+      <ul>
+        <li>Valida nombre obligatorio y longitud máxima.</li>
+        <li>Valida duración mínima de 1 día.</li>
+        <li>Valida la frecuencia admitida.</li>
+        <li>Valida y normaliza los días semanales.</li>
+        <li>Rechaza frecuencia semanal sin días seleccionados.</li>
+      </ul>
+    </section>
+  </div>
+
+  <h2>Flujo funcional</h2>
+  <ol>
+    <li>El usuario inicia sesión en VitaLog.</li>
+    <li>El usuario abre la pantalla de creación de hábito.</li>
+    <li>Ingresa el nombre y modifica opcionalmente la duración.</li>
+    <li>Selecciona una frecuencia diaria o semanal.</li>
+    <li>Si selecciona semanal, marca uno o más días.</li>
+    <li>El usuario pulsa <strong>Crear hábito</strong>.</li>
+    <li>El backend obtiene la cuenta desde la autenticación y no acepta un identificador de usuario enviado por el cliente.</li>
+    <li>El hábito se guarda en MongoDB asociado a la cuenta autenticada.</li>
+    <li>La interfaz añade el hábito creado a la lista visible.</li>
+  </ol>
+
+  <h2>Escenarios de aceptación</h2>
+
+  <section class="card scenario">
+    <h3>Crear hábito diario</h3>
+    <p><strong>Datos:</strong> nombre «Beber agua», duración 66, frecuencia diaria.</p>
+    <p><strong>Resultado esperado:</strong> <span class="result">hábito creado con duración 66 días, sin días semanales, estado en construcción y fecha de inicio asignada.</span></p>
+  </section>
+
+  <section class="card scenario">
+    <h3>Crear hábito semanal</h3>
+    <p><strong>Datos:</strong> nombre «Correr», duración 30, frecuencia semanal y días lunes y viernes.</p>
+    <p><strong>Resultado esperado:</strong> <span class="result">hábito creado con ambos días asociados y estado en construcción.</span></p>
+  </section>
+
+  <section class="card scenario">
+    <h3>Rechazar semanal sin días</h3>
+    <p><strong>Datos:</strong> nombre válido, duración válida y frecuencia semanal sin seleccionar días.</p>
+    <p><strong>Resultado esperado:</strong> <span class="result">no se guarda el hábito y se muestra «Selecciona al menos un día para la frecuencia semanal.»</span></p>
+  </section>
+
+  <section class="card scenario">
+    <h3>Rechazar duración menor a uno</h3>
+    <p><strong>Datos:</strong> duración 0 o negativa.</p>
+    <p><strong>Resultado esperado:</strong> <span class="result">no se guarda el hábito y se solicita una duración de al menos 1 día.</span></p>
+  </section>
+
+  <section class="card scenario">
+    <h3>Evitar asociación a otra cuenta</h3>
+    <p><strong>Datos:</strong> sesión iniciada como Ana y posible intento de enviar otro <code>userId</code>.</p>
+    <p><strong>Resultado esperado:</strong> <span class="result">el hábito se asocia únicamente al usuario autenticado; el identificador enviado por el cliente no se utiliza.</span></p>
+  </section>
+
+  <h2>API funcional</h2>
+  <table>
+    <thead><tr><th>Operación</th><th>Ruta</th><th>Autenticación</th></tr></thead>
+    <tbody>
+      <tr><td>Consultar hábitos del usuario</td><td><code>GET /api/habits</code></td><td>Sesión autenticada obligatoria</td></tr>
+      <tr><td>Crear hábito</td><td><code>POST /api/habits</code></td><td>Sesión autenticada obligatoria y CSRF válido</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Persistencia</h2>
+  <p>Los hábitos se almacenan en la colección <code>habits</code> de MongoDB con:</p>
+  <ul>
+    <li>Identificador generado.</li>
+    <li>Correo de la cuenta autenticada.</li>
+    <li>Nombre.</li>
+    <li>Duración en días.</li>
+    <li>Frecuencia diaria o semanal.</li>
+    <li>Días seleccionados, vacío para frecuencia diaria.</li>
+    <li>Fecha de inicio.</li>
+    <li>Estado inicial «en construcción».</li>
+  </ul>
+
+  <h2>Comportamiento fuera de alcance</h2>
+  <p>RU-02 no incluye recordatorios ni edición del hábito. Estas capacidades no están disponibles en el flujo implementado.</p>
+
+  <h2>Verificación técnica realizada</h2>
+  <ul>
+    <li>Pruebas backend: 7 aprobadas y 0 fallidas.</li>
+    <li>Pruebas frontend: 5 aprobadas y 0 fallidas.</li>
+    <li>Compilación de producción React completada.</li>
+  </ul>
+
+  <p class="tag">Documento generado el 20 de noviembre de 2026.</p>
+</main>
+</body>
+</html>
